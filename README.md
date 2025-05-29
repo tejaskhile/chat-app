@@ -1,70 +1,151 @@
-# Getting Started with Create React App
+# Real-Time Collaborative Chat Application
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A real-time collaborative chat application built with React, Node.js, Express, MongoDB, and Socket.IO.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- 👥 User Authentication (Register/Login)
+- 💬 Real-time Chat
+- 🤝 Project Collaboration
+- 👥 Add Team Members
+- 🤖 AI Assistant Integration (@ai commands)
+- 📝 Code Editor with Syntax Highlighting
 
-### `npm start`
+## Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Frontend**: React, Socket.IO-client
+- **Backend**: Node.js, Express
+- **Database**: MongoDB
+- **Real-time**: Socket.IO
+- **Authentication**: JWT
+- **Cache**: Redis
+- **AI Integration**: Google Generative AI
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## API Endpoints
 
-### `npm test`
+### Authentication Routes
+```http
+POST /users/register
+{
+    "email": "user@example.com",
+    "password": "password123"
+}
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+POST /users/login
+{
+    "email": "user@example.com",
+    "password": "password123"
+}
 
-### `npm run build`
+GET /users/profile
+Authorization: Bearer <token>
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+GET /users/logout
+Authorization: Bearer <token>
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+GET /users/all
+Authorization: Bearer <token>
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Project Routes
+```http
+POST /projects/create
+Authorization: Bearer <token>
+{
+    "name": "Project Name"
+}
 
-### `npm run eject`
+GET /projects/all
+Authorization: Bearer <token>
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+PUT /projects/add-user
+Authorization: Bearer <token>
+{
+    "projectId": "project_id",
+    "users": ["user_id1", "user_id2"]
+}
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+GET /projects/get-project/:projectId
+Authorization: Bearer <token>
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Environment Variables
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```env
+PORT=3000
+MONGODB_URI=mongodb://localhost:27017/chat-app
+JWT_SECRET=your_jwt_secret
+REDIS_HOST=your_redis_host
+REDIS_PORT=your_redis_port
+REDIS_PASSWORD=your_redis_password
+GOOGLE_API_KEY=your_google_ai_api_key
+```
 
-## Learn More
+## Installation
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. Clone the repository
+```bash
+git clone https://github.com/yourusername/chat-app.git
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+2. Install dependencies for both frontend and backend
+```bash
+# Install backend dependencies
+cd backend
+npm install
 
-### Code Splitting
+# Install frontend dependencies
+cd ../frontend
+npm install
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+3. Set up environment variables
+- Create `.env` file in both frontend and backend directories
+- Add the required environment variables
 
-### Analyzing the Bundle Size
+4. Start the application
+```bash
+# Start backend server
+cd backend
+npm start
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+# Start frontend development server
+cd frontend
+npm start
+```
 
-### Making a Progressive Web App
+## WebSocket Events
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```javascript
+// Connect to project chat
+socket.emit('connection', { projectId, token })
 
-### Advanced Configuration
+// Send message in project chat
+socket.emit('project-message', { 
+    message, 
+    sender, 
+    projectId 
+})
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+// Receive message in project chat
+socket.on('project-message', (data) => {
+    // Handle incoming message
+})
+```
 
-### Deployment
+## AI Assistant Commands
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Use `@ai` in chat followed by your prompt to interact with the AI assistant:
 
-### `npm run build` fails to minify
+```
+@ai create an express server
+@ai generate react component
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
