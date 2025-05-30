@@ -25,8 +25,6 @@ const Project = () => {
   const [openFiles, setOpenFiles] = useState([]);
   const [fileTree, setFileTree] = useState({});
   const [webContainer, setWebContainer] = useState(null);
-  const [iframeUrl, setIframeUrl] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   const messageBox = React.createRef();
 
@@ -127,24 +125,6 @@ const Project = () => {
     }
   }, [messages, project?._id]);
 
-
-  const createProcessStream = (prefix) => {
-    const decoder = new TextDecoder();
-    return new WritableStream({
-      write(chunk) {
-        if (chunk instanceof Uint8Array) {
-          const text = decoder.decode(chunk);
-          console.log(`${prefix}:`, text.trim());
-        }
-      },
-      close() {
-        console.log(`${prefix} stream closed`);
-      },
-      abort(err) {
-        console.error(`${prefix} stream error:`, err);
-      }
-    });
-  };
 
   useEffect(() => {
     if (!project?._id) return;
