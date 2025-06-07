@@ -1,10 +1,10 @@
-import axios from 'axios'
+import axios from "axios";
 
 const axiosInstance = axios.create({
-    baseURL: process.env.REACT_APP_API_URL,
-    headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-    }
-})
+  baseURL: process.env.REACT_APP_API_URL || process.env.RENDER_APP_API_URL,
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("token")}`,
+  },
+});
 
-export default axiosInstance
+export default axiosInstance;
