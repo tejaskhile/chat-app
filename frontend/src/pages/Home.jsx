@@ -62,8 +62,6 @@ const Home = () => {
         ))
       }
 
-
-
       {
         newcard && (
           <div className='projectCard-container'>
