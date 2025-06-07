@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import { UserProvider } from './context/userContext';
@@ -15,7 +15,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
 
     <UserProvider>
-    <BrowserRouter basename='/chat-app'>
+    <HashRouter>
       <App />
     <Routes>
       <Route path="/" element={<UserAuth> <Home/> </UserAuth> } />
@@ -23,7 +23,7 @@ root.render(
       <Route path="/register" element={ <Register/> } />
       <Route path="/project" element={<UserAuth> <Project/> </UserAuth>} />
     </Routes>
-    </BrowserRouter>
+    </HashRouter>
     </UserProvider>
 );
 

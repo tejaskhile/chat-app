@@ -76,7 +76,7 @@ const Project = () => {
   }
 
   const send = () => {
-    if (!message.trim() || !project?._id) return;
+    if (!message || message.trim().toLowerCase() === "undefined" || !project?._id) return;
 
     const messageData = {
       message,
@@ -92,13 +92,22 @@ const Project = () => {
 
   function WriteAiMessage(message) {
     try {
-      // If message is already an object, use it directly
-      const messageData =
-        typeof message === "string"
-          ? message.startsWith("{")
+      let messageData;
+
+      if (typeof message === "string") {
+        try {
+          messageData = message.trim().startsWith("{")
             ? JSON.parse(message)
-            : { text: message }
-          : message;
+            : { text: message };
+        } catch (err) {
+          console.warn("Invalid JSON:", message);
+          messageData = { text: message };
+        }
+      } else if (typeof message === "object" && message !== null) {
+        messageData = message;
+      } else {
+        messageData = { text: String(message) };
+      }
 
       if (messageData.fileTree) {
         return messageData.text || "Generated file structure";
@@ -111,41 +120,31 @@ const Project = () => {
 
   hljs.highlightAll();
 
-
   useEffect(() => {
     const storedMessages = localStorage.getItem(`chat_${project?._id}`);
     if (storedMessages) {
       setMessages(JSON.parse(storedMessages));
     }
   }, [project?._id]);
- 
+
   useEffect(() => {
     if (project?._id) {
       localStorage.setItem(`chat_${project._id}`, JSON.stringify(messages));
     }
   }, [messages, project?._id]);
 
-
   useEffect(() => {
     if (!project?._id) return;
 
     const socket = initializeSocket(project._id);
 
-    // if (!webContainer) {
-    //   getWebContainer().then((container) => {
-    //     setWebContainer(container);
-    //     console.log("WebContainer initialized");
-    //   });
-    // }
-
     receiveMessage("project-message", (data) => {
       console.log("Received message:", data);
 
-      webContainer?.mount(message.fileTree);
-
       try {
         const message =
-          typeof data.message === "string"
+          typeof data.message === "string" &&
+          data.message.trim().startsWith("{")
             ? JSON.parse(data.message)
             : data.message;
 
@@ -164,7 +163,7 @@ const Project = () => {
         setMessages((prev) => [...prev, data]);
       }
 
-      document.querySelectorAll('pre code').forEach((el) => {
+      document.querySelectorAll("pre code").forEach((el) => {
         delete el.dataset.highlighted;
       });
 
@@ -201,7 +200,6 @@ const Project = () => {
       messageBox.current.scrollTop = messageBox.current.scrollHeight;
     }
   }, [messages]);
-
 
   return (
     <div className="project-container">
@@ -329,141 +327,6 @@ const Project = () => {
                   </button>
                 ))}
               </div>
-              {/* <button onClick={async ()=>{
-
-                try{
-
-                  await webContainer?.mount(fileTree);
-
-                  if (!fileTree['package.json']?.file?.contents) {
-                    console.error('No valid package.json found');
-                    return;
-                  }   
-                  
-                  console.log('Mounting files...');
-                  // Mount files with explicit error handling
-                  try {
-                    await webContainer.mount({
-                      'package.json': {
-                        file: {
-                          contents: fileTree['package.json'].file.contents
-                        }
-                      },
-                      ...fileTree
-                    });
-                    console.log('Files mounted successfully');
-                  } catch (mountError) {
-                    console.error('Error mounting files:', mountError);
-                    return;
-                  }
-  
-                  webContainer.on('server-ready', (port, url)=>{
-                   console.log('Server is ready at:', url);
-                   setIframeUrl(url);
-                  })
-
-                  const installProcess = await webContainer.spawn('npm', ['install']);
-  
-                  const decoder = new TextDecoder();
-                    let installOutput = '';
-
-                    await installProcess.output.pipeTo(new WritableStream({
-                      write(chunk) {
-                        // Decode the chunk and remove ANSI escape sequences
-                        const text = decoder.decode(chunk).replace(/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]/g, '');
-                        installOutput += text;
-                        console.log('npm install:', text.trim());
-                      }
-                    }));
-
-                  const installExitCode = await installProcess.exit;
-                  console.log('Install completed with code:', installExitCode);
-  
-                  if (installExitCode !== 0) {
-                    throw new Error('npm install failed');
-                  }
-  
-                  const runProcess = await webContainer.spawn('npm', ['start']);
-                  await runProcess.output.pipeTo(new WritableStream({
-                      write: (chunk) => {
-                        console.log(chunk);
-                      }
-                    }));
-
-                }
-                catch(error){
-                  console.error('Error during npm install:', error);
-                }
-              }}>
-                RUN
-              </button> */}
-
-              {/* <button
-              
-                onClick={async () => {
-                  setIsLoading(true);
-
-                  try {
-                    if (!webContainer) {
-                      console.error("WebContainer not initialized");
-                      return;
-                    }
-
-                    webContainer.removeAllListeners();
-
-                    webContainer.on("server-ready", (port, url) => {
-                      console.log("Server ready on:", url);
-                      setIframeUrl(url);
-                      setIsLoading(false);
-                    });
-
-                    webContainer.on('error', (error) => {
-                      console.error('Server error:', error);
-                      setIsLoading(false);
-                    });
-
-                    console.log("Mounting files...");
-                    
-                    const packageJson = JSON.parse(
-                      fileTree["package.json"].file.contents.trim()
-                    );
-
-                    await webContainer.mount({
-                      "package.json": {
-                        file: {
-                          contents: JSON.stringify(packageJson, null, 2),
-                        },
-                      },
-                      ...Object.fromEntries(
-                        Object.entries(fileTree).filter(
-                          ([key]) => key !== "package.json"
-                        )
-                      ),
-                    });
-
-                    // Install dependencies
-                    console.log("Starting npm install...");
-                    const installProcess = await webContainer.spawn('npm', ['install']);
-                    await installProcess.output.pipeTo(createProcessStream('npm install'));
-                    
-                    const installExitCode = await installProcess.exit;
-                    if (installExitCode !== 0) {
-                      throw new Error(`Install failed with code ${installExitCode}`);
-                    }
-
-                    // Start the application
-                    console.log("Starting application...");
-                    const startProcess = await webContainer.spawn('npm', ['start']);
-                    await startProcess.output.pipeTo(createProcessStream('npm start'));
-
-                  } catch (error) {
-                    console.error("Runtime error:", error);
-                    setIsLoading(false);
-                  }
-                }}
-              >
-                RUN
-              </button> */}
             </div>
 
             <div className="bottom">
@@ -505,23 +368,6 @@ const Project = () => {
           </div>
         )}
       </div>
-
-      {/* {iframeUrl && webContainer && (
-        <div className="webcontainer-wrapper">
-          <iframe 
-            src={iframeUrl} 
-            allow="cross-origin-isolated allow-scripts"
-            className="iframe" 
-            title="preview"
-            loading="lazy"
-            sandbox="allow-same-origin allow-scripts allow-forms"
-            onError={(e) => {
-              console.error('Iframe error:', e);
-              setIsLoading(false);
-            }}
-          />
-        </div>
-      )} */}
     </div>
   );
 };
