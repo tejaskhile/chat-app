@@ -13,7 +13,7 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
   <UserProvider>
-    <HashRouter basename="/chat-app">
+    <HashRouter>
       <App />
       <Routes>
         <Route
